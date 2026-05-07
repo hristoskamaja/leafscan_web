@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Diseases from './pages/Diseases/Diseases';
 import Users from './pages/Users/Users';
 import AnalysisHistory from './pages/AnalysisHistory/AnalysisHistory';
+import Statistics from './pages/Statistics/Statistics';
 
 function PrivateRoute({ children }) {
     const { isAuthenticated } = useAuth();
@@ -37,7 +38,7 @@ function AppRoutes() {
                 <Route path="diseases"   element={<Diseases />} />
                 <Route path="users" element={<Users />} />
                 <Route path="analyses" element={<AnalysisHistory />} />
-                <Route path="statistics" element={<Placeholder title="Statistics" />} />
+                <Route path="statistics" element={<Statistics />} />
                 <Route path="settings"   element={<Placeholder title="Settings" />} />
                 <Route path="profile"    element={<Placeholder title="Profile" />} />
             </Route>
