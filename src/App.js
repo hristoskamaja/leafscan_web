@@ -4,6 +4,8 @@ import AdminLayout from './components/layout/AdminLayout';
 import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Diseases from './pages/Diseases/Diseases';
+import Users from './pages/Users/Users';
+import AnalysisHistory from './pages/AnalysisHistory/AnalysisHistory';
 
 function PrivateRoute({ children }) {
     const { isAuthenticated } = useAuth();
@@ -33,8 +35,8 @@ function AppRoutes() {
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard"  element={<Dashboard />} />
                 <Route path="diseases"   element={<Diseases />} />
-                <Route path="users"      element={<Placeholder title="Users" />} />
-                <Route path="analyses"   element={<Placeholder title="Analysis History" />} />
+                <Route path="users" element={<Users />} />
+                <Route path="analyses" element={<AnalysisHistory />} />
                 <Route path="statistics" element={<Placeholder title="Statistics" />} />
                 <Route path="settings"   element={<Placeholder title="Settings" />} />
                 <Route path="profile"    element={<Placeholder title="Profile" />} />
