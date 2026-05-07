@@ -153,8 +153,8 @@ export default function Dashboard() {
                         <PieChart>
                             <Pie
                                 data={DISEASE_DIST}
-                                cx="50%" cy="42%"
-                                innerRadius={65} outerRadius={100}
+                                cx="50%" cy="50%"
+                                innerRadius={55} outerRadius={85}
                                 paddingAngle={3}
                                 dataKey="value"
                             >
