@@ -4,6 +4,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Diseases from './pages/Diseases/Diseases';
+import Plants from './pages/Plants/Plants';
 import Users from './pages/Users/Users';
 import AnalysisHistory from './pages/AnalysisHistory/AnalysisHistory';
 import Statistics from './pages/Statistics/Statistics';
@@ -19,17 +20,11 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
-            <Route
-                path="/"
-                element={
-                    <PrivateRoute>
-                        <AdminLayout />
-                    </PrivateRoute>
-                }
-            >
+            <Route path="/" element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
                 <Route index        element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard"  element={<Dashboard />} />
                 <Route path="diseases"   element={<Diseases />} />
+                <Route path="plants"     element={<Plants />} />
                 <Route path="users"      element={<Users />} />
                 <Route path="analyses"   element={<AnalysisHistory />} />
                 <Route path="statistics" element={<Statistics />} />
