@@ -33,15 +33,6 @@ export default function Settings() {
           <h1 className="page-title">General Settings</h1>
           <p className="page-subtitle">System-wide preferences for the admin panel</p>
         </div>
-        <button
-          className={`btn ${saved ? 'btn--saved' : 'btn--primary'}`}
-          onClick={handleSave}
-        >
-          {saved
-            ? <><Check size={16} strokeWidth={2.5} /> Saved</>
-            : <><Save  size={16} strokeWidth={1.8} /> Save Changes</>
-          }
-        </button>
       </div>
 
       <div className="settings-sections">
