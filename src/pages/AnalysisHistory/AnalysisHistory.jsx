@@ -1,20 +1,21 @@
 import { useState } from 'react';
-import { Search, X, Eye, Trash2, Download, ChevronUp, ChevronDown, AlertTriangle, FileText, Activity, Leaf } from 'lucide-react';
+import { Search, X, Eye, Trash2, Download, ChevronUp, ChevronDown, AlertTriangle, FileText, Activity, Leaf, UserCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './AnalysisHistory.css';
 
 const MOCK_ANALYSES = [
-  { id: 1,  key: 'AN-2847', plant: 'Tomato',     disease: 'Leaf Blight',    confidence: 94.2, result: 'INFECTED', date: '2026-05-07' },
-  { id: 2,  key: 'AN-2846', plant: 'Potato',     disease: null,             confidence: 98.1, result: 'HEALTHY',  date: '2026-05-07' },
-  { id: 3,  key: 'AN-2845', plant: 'Corn',       disease: 'Rust Disease',   confidence: 87.5, result: 'INFECTED', date: '2026-05-06' },
-  { id: 4,  key: 'AN-2844', plant: 'Grape',      disease: 'Powdery Mildew', confidence: 91.3, result: 'INFECTED', date: '2026-05-06' },
-  { id: 5,  key: 'AN-2843', plant: 'Apple',      disease: null,             confidence: 96.7, result: 'HEALTHY',  date: '2026-05-05' },
-  { id: 6,  key: 'AN-2842', plant: 'Basil',      disease: 'Root Rot',       confidence: 88.4, result: 'INFECTED', date: '2026-05-05' },
-  { id: 7,  key: 'AN-2841', plant: 'Sunflower',  disease: null,             confidence: 99.1, result: 'HEALTHY',  date: '2026-05-04' },
-  { id: 8,  key: 'AN-2840', plant: 'Pepper',     disease: 'Mosaic Virus',   confidence: 83.6, result: 'INFECTED', date: '2026-05-04' },
-  { id: 9,  key: 'AN-2839', plant: 'Rose',       disease: 'Bacterial Spot', confidence: 90.2, result: 'INFECTED', date: '2026-05-03' },
-  { id: 10, key: 'AN-2838', plant: 'Cucumber',   disease: null,             confidence: 97.8, result: 'HEALTHY',  date: '2026-05-03' },
-  { id: 11, key: 'AN-2837', plant: 'Wheat',      disease: 'Leaf Blight',    confidence: 85.3, result: 'INFECTED', date: '2026-05-02' },
-  { id: 12, key: 'AN-2836', plant: 'Strawberry', disease: null,             confidence: 95.5, result: 'HEALTHY',  date: '2026-05-01' },
+  { id: 1,  key: 'AN-2847', userId: 1, plant: 'Tomato',     disease: 'Leaf Blight',    confidence: 94.2, result: 'INFECTED', date: '2026-05-07' },
+  { id: 2,  key: 'AN-2846', userId: 2, plant: 'Potato',     disease: null,             confidence: 98.1, result: 'HEALTHY',  date: '2026-05-07' },
+  { id: 3,  key: 'AN-2845', userId: 1, plant: 'Corn',       disease: 'Rust Disease',   confidence: 87.5, result: 'INFECTED', date: '2026-05-06' },
+  { id: 4,  key: 'AN-2844', userId: 3, plant: 'Grape',      disease: 'Powdery Mildew', confidence: 91.3, result: 'INFECTED', date: '2026-05-06' },
+  { id: 5,  key: 'AN-2843', userId: 2, plant: 'Apple',      disease: null,             confidence: 96.7, result: 'HEALTHY',  date: '2026-05-05' },
+  { id: 6,  key: 'AN-2842', userId: 4, plant: 'Basil',      disease: 'Root Rot',       confidence: 88.4, result: 'INFECTED', date: '2026-05-05' },
+  { id: 7,  key: 'AN-2841', userId: 1, plant: 'Sunflower',  disease: null,             confidence: 99.1, result: 'HEALTHY',  date: '2026-05-04' },
+  { id: 8,  key: 'AN-2840', userId: 3, plant: 'Pepper',     disease: 'Mosaic Virus',   confidence: 83.6, result: 'INFECTED', date: '2026-05-04' },
+  { id: 9,  key: 'AN-2839', userId: 5, plant: 'Rose',       disease: 'Bacterial Spot', confidence: 90.2, result: 'INFECTED', date: '2026-05-03' },
+  { id: 10, key: 'AN-2838', userId: 2, plant: 'Cucumber',   disease: null,             confidence: 97.8, result: 'HEALTHY',  date: '2026-05-03' },
+  { id: 11, key: 'AN-2837', userId: 4, plant: 'Wheat',      disease: 'Leaf Blight',    confidence: 85.3, result: 'INFECTED', date: '2026-05-02' },
+  { id: 12, key: 'AN-2836', userId: 5, plant: 'Strawberry', disease: null,             confidence: 95.5, result: 'HEALTHY',  date: '2026-05-01' },
 ];
 
 function ResultBadge({ result }) {
@@ -114,6 +115,10 @@ function DeleteModal({ analysis, onConfirm, onCancel }) {
 }
 
 export default function AnalysisHistory() {
+  const location   = useLocation();
+  const navigate   = useNavigate();
+  const userFilter = location.state?.userId   || null;
+  const userName   = location.state?.userName || null;
   const [analyses, setAnalyses] = useState(MOCK_ANALYSES);
   const [search,   setSearch]   = useState('');
   const [filter,   setFilter]   = useState('ALL');
@@ -132,7 +137,8 @@ export default function AnalysisHistory() {
         filter === 'ALL'      ? true :
         filter === 'HEALTHY'  ? a.result === 'HEALTHY' :
         filter === 'INFECTED' ? a.result === 'INFECTED' : true;
-      return matchSearch && matchFilter;
+      const matchUser = userFilter ? a.userId === userFilter : true;
+      return matchSearch && matchFilter && matchUser;
     })
     .sort((a, b) => {
       const av = a[sortKey], bv = b[sortKey];
@@ -172,6 +178,17 @@ export default function AnalysisHistory() {
           <Download size={16} strokeWidth={1.8} /> Export History
         </button>
       </div>
+
+      {/* User filter banner */}
+      {userFilter && (
+        <div className="user-filter-banner">
+          <UserCircle size={16} strokeWidth={1.8} />
+          <span>Showing analyses for <strong>{userName}</strong></span>
+          <button className="user-filter-clear" onClick={() => navigate('/analyses', { replace: true })}>
+            Clear filter ×
+          </button>
+        </div>
+      )}
 
       <div className="analysis-stats">
         <div className="analysis-stat">
