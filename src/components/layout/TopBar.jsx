@@ -25,7 +25,7 @@ export default function TopBar() {
                 {/* Language */}
                 <button className="topbar-icon-btn">
                     <Globe size={16} strokeWidth={1.8} color="var(--text-muted)" />
-                    <span className="topbar-lang">MK</span>
+                    <span className="topbar-lang">EN</span>
                 </button>
 
                 {/* User — no arrow, no notifications */}

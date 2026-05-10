@@ -1,27 +1,18 @@
-import {useState} from 'react';
-import {Globe, Bell, Shield, Info, Check, Save, Moon, Sun} from 'lucide-react';
-import {useTheme} from '../../context/ThemeContext';
+import { useState } from 'react';
+import { Globe, Bell, Shield, Info, Check, Save, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import './Settings.css';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Settings page — system preferences
-// LATER:
-//   Language → integrate with react-i18next
-//   Notifications → POST /api/settings/notifications/
-//   Security → POST /api/auth/2fa/
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function Settings() {
-    const {isDark, toggleTheme} = useTheme();
-    const [language, setLanguage] = useState('en');
+    const { isDark, toggleTheme } = useTheme();
+    const [language,   setLanguage]   = useState('en');
     const [emailNotif, setEmailNotif] = useState(true);
-    const [pushNotif, setPushNotif] = useState(false);
-    const [twoFactor, setTwoFactor] = useState(false);
+    const [pushNotif,  setPushNotif]  = useState(false);
+    const [twoFactor,  setTwoFactor]  = useState(false);
     const [sessionLog, setSessionLog] = useState(true);
-    const [saved, setSaved] = useState(false);
+    const [saved,      setSaved]      = useState(false);
 
     const handleSave = () => {
-        // LATER: await settingsAPI.save({ language, emailNotif, pushNotif, twoFactor, sessionLog });
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
     };
@@ -29,7 +20,6 @@ export default function Settings() {
     return (
         <div className="settings-page">
 
-            {/* Header */}
             <div className="page-header">
                 <div>
                     <h1 className="page-title">General Settings</h1>
@@ -39,17 +29,15 @@ export default function Settings() {
 
             <div className="settings-sections">
 
-                {/* ── Language ─────────────────────────────────────────────────────── */}
+                {/* Language */}
                 <div className="settings-card">
                     <div className="settings-section-header">
                         <div className="settings-section-icon settings-section-icon--orange">
-                            <Globe size={17} strokeWidth={1.8}/>
+                            <Globe size={17} strokeWidth={1.8} />
                         </div>
                         <div>
                             <h2 className="settings-section-title">Language</h2>
-                            <p className="settings-section-desc">
-                                Choose the display language for the admin panel interface
-                            </p>
+                            <p className="settings-section-desc">Choose the display language for the admin panel interface</p>
                         </div>
                     </div>
                     <div className="settings-card-body">
@@ -69,17 +57,16 @@ export default function Settings() {
                         </div>
                     </div>
                 </div>
-                {/* ── Appearance ─────────────────────────────────────────────────── */}
+
+                {/* Appearance */}
                 <div className="settings-card">
                     <div className="settings-section-header">
                         <div className="settings-section-icon settings-section-icon--teal">
-                            {isDark ? <Moon size={17} strokeWidth={1.8}/> : <Sun size={17} strokeWidth={1.8}/>}
+                            {isDark ? <Moon size={17} strokeWidth={1.8} /> : <Sun size={17} strokeWidth={1.8} />}
                         </div>
                         <div>
                             <h2 className="settings-section-title">Appearance</h2>
-                            <p className="settings-section-desc">
-                                Switch between dark and light mode
-                            </p>
+                            <p className="settings-section-desc">Switch between dark and light mode</p>
                         </div>
                     </div>
                     <div className="settings-card-body">
@@ -89,17 +76,17 @@ export default function Settings() {
                             checked={isDark}
                             onChange={toggleTheme}
                         />
-                        <div className="settings-divider"/>
+                        <div className="settings-divider" />
                         <div className="theme-picker">
                             <div
                                 className={`theme-option ${isDark ? 'theme-option--active' : ''}`}
                                 onClick={() => !isDark && toggleTheme()}
                             >
                                 <div className="theme-thumb theme-thumb--dark">
-                                    <div className="theme-thumb-sidebar theme-thumb-sidebar--dark"/>
+                                    <div className="theme-thumb-sidebar theme-thumb-sidebar--dark" />
                                     <div className="theme-thumb-content">
-                                        <div className="theme-thumb-bar"/>
-                                        <div className="theme-thumb-bar theme-thumb-bar--short"/>
+                                        <div className="theme-thumb-bar" />
+                                        <div className="theme-thumb-bar theme-thumb-bar--short" />
                                     </div>
                                 </div>
                                 <span>Dark</span>
@@ -109,10 +96,10 @@ export default function Settings() {
                                 onClick={() => isDark && toggleTheme()}
                             >
                                 <div className="theme-thumb theme-thumb--light">
-                                    <div className="theme-thumb-sidebar theme-thumb-sidebar--light"/>
+                                    <div className="theme-thumb-sidebar theme-thumb-sidebar--light" />
                                     <div className="theme-thumb-content theme-thumb-content--light">
-                                        <div className="theme-thumb-bar theme-thumb-bar--light"/>
-                                        <div className="theme-thumb-bar theme-thumb-bar--short theme-thumb-bar--light"/>
+                                        <div className="theme-thumb-bar theme-thumb-bar--light" />
+                                        <div className="theme-thumb-bar theme-thumb-bar--short theme-thumb-bar--light" />
                                     </div>
                                 </div>
                                 <span>Light</span>
@@ -121,77 +108,72 @@ export default function Settings() {
                     </div>
                 </div>
 
-            </div>
-            {/* ── Notifications ─────────────────────────────────────────────────── */}
-            <div className="settings-card">
-                <div className="settings-section-header">
-                    <div className="settings-section-icon settings-section-icon--green">
-                        <Bell size={17} strokeWidth={1.8}/>
+                {/* Notifications */}
+                <div className="settings-card">
+                    <div className="settings-section-header">
+                        <div className="settings-section-icon settings-section-icon--green">
+                            <Bell size={17} strokeWidth={1.8} />
+                        </div>
+                        <div>
+                            <h2 className="settings-section-title">Notifications</h2>
+                            <p className="settings-section-desc">Control how and when you receive alerts</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="settings-section-title">Notifications</h2>
-                        <p className="settings-section-desc">
-                            Control how and when you receive alerts
-                        </p>
+                    <div className="settings-card-body">
+                        <ToggleRow
+                            label="Email Notifications"
+                            sub="Receive email alerts for new analyses"
+                            checked={emailNotif}
+                            onChange={setEmailNotif}
+                        />
+                        <div className="settings-divider" />
+                        <ToggleRow
+                            label="Push Notifications"
+                            sub="Browser push notifications for critical alerts"
+                            checked={pushNotif}
+                            onChange={setPushNotif}
+                        />
                     </div>
                 </div>
-                <div className="settings-card-body">
-                    <ToggleRow
-                        label="Email Notifications"
-                        sub="Receive email alerts for new analyses"
-                        checked={emailNotif}
-                        onChange={setEmailNotif}
-                    />
-                    <div className="settings-divider"/>
-                    <ToggleRow
-                        label="Push Notifications"
-                        sub="Browser push notifications for critical alerts"
-                        checked={pushNotif}
-                        onChange={setPushNotif}
-                    />
-                </div>
-            </div>
 
-            {/* ── Security ─────────────────────────────────────────────────────── */}
-            <div className="settings-card">
-                <div className="settings-section-header">
-                    <div className="settings-section-icon settings-section-icon--red">
-                        <Shield size={17} strokeWidth={1.8}/>
+                {/* Security */}
+                <div className="settings-card">
+                    <div className="settings-section-header">
+                        <div className="settings-section-icon settings-section-icon--red">
+                            <Shield size={17} strokeWidth={1.8} />
+                        </div>
+                        <div>
+                            <h2 className="settings-section-title">Security</h2>
+                            <p className="settings-section-desc">Account security and session preferences</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="settings-section-title">Security</h2>
-                        <p className="settings-section-desc">
-                            Account security and session preferences
-                        </p>
+                    <div className="settings-card-body">
+                        <ToggleRow
+                            label="Two-Factor Authentication"
+                            sub="Require a verification code on every login"
+                            checked={twoFactor}
+                            onChange={setTwoFactor}
+                        />
+                        <div className="settings-divider" />
+                        <ToggleRow
+                            label="Session Activity Log"
+                            sub="Keep a log of all admin login sessions"
+                            checked={sessionLog}
+                            onChange={setSessionLog}
+                        />
                     </div>
                 </div>
-                <div className="settings-card-body">
-                    <ToggleRow
-                        label="Two-Factor Authentication"
-                        sub="Require a verification code on every login"
-                        checked={twoFactor}
-                        onChange={setTwoFactor}
-                    />
-                    <div className="settings-divider"/>
-                    <ToggleRow
-                        label="Session Activity Log"
-                        sub="Keep a log of all admin login sessions"
-                        checked={sessionLog}
-                        onChange={setSessionLog}
-                    />
-                </div>
+
             </div>
 
-
-            {/* Bottom save */}
             <div className="settings-footer">
                 <button
                     className={`btn btn--lg ${saved ? 'btn--saved' : 'btn--primary'}`}
                     onClick={handleSave}
                 >
                     {saved
-                        ? <><Check size={17} strokeWidth={2.5}/> Changes Saved!</>
-                        : <><Save size={17} strokeWidth={1.8}/> Save All Changes</>
+                        ? <><Check size={17} strokeWidth={2.5} /> Changes Saved!</>
+                        : <><Save  size={17} strokeWidth={1.8} /> Save All Changes</>
                     }
                 </button>
             </div>
@@ -200,8 +182,7 @@ export default function Settings() {
     );
 }
 
-// ── Toggle component ──────────────────────────────────────────────────────────
-function ToggleRow({label, sub, checked, onChange}) {
+function ToggleRow({ label, sub, checked, onChange }) {
     return (
         <div className="toggle-row">
             <div>
@@ -214,7 +195,7 @@ function ToggleRow({label, sub, checked, onChange}) {
                 role="switch"
                 aria-checked={checked}
             >
-                <span className="toggle-thumb"/>
+                <span className="toggle-thumb" />
             </button>
         </div>
     );
