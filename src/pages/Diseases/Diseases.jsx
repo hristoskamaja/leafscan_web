@@ -4,6 +4,7 @@ import {
     ChevronUp, ChevronDown, X, AlertTriangle,
     Leaf, Thermometer, FileText, Activity
 } from 'lucide-react';
+import { useLang } from '../../context/LanguageContext';
 import './Diseases.css';
 
 // ── Mock data ─────────────────────────────────────────────────────────────────
@@ -45,18 +46,22 @@ const CATEGORY_OPTIONS = ['FUNGAL', 'BACTERIAL', 'VIRAL', 'OTHER'];
 const EMPTY_FORM = { name: '', category: 'FUNGAL', severity: 'MEDIUM', description: '', symptoms: '', image: null, image_description: '' };
 
 // ── Severity badge ────────────────────────────────────────────────────────────
-function SeverityBadge({ severity }) {
+function SeverityBadge({ severity, t }) {
     const cls = { LOW: 'badge--low', MEDIUM: 'badge--medium', HIGH: 'badge--high' };
-    return <span className={`sev-badge ${cls[severity] || ''}`}>{severity}</span>;
+    const labels = {
+        LOW:    t('diseases.low'),
+        MEDIUM: t('diseases.medium'),
+        HIGH:   t('diseases.high'),
+    };
+    return <span className={`sev-badge ${cls[severity] || ''}`}>{labels[severity] || severity}</span>;
 }
 
 // ── Detail modal ──────────────────────────────────────────────────────────────
-function DetailModal({ disease, onEdit, onClose }) {
+function DetailModal({ disease, onEdit, onClose, t }) {
     if (!disease) return null;
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-box" onClick={e => e.stopPropagation()}>
-                {/* Header */}
                 <div className="modal-header">
                     <div className="modal-header-left">
                         <div className="modal-disease-icon">
@@ -67,7 +72,7 @@ function DetailModal({ disease, onEdit, onClose }) {
                             <div className="modal-meta">
                                 <span className="modal-category">{disease.category}</span>
                                 <span className="modal-dot">·</span>
-                                <SeverityBadge severity={disease.severity} />
+                                <SeverityBadge severity={disease.severity} t={t} />
                             </div>
                         </div>
                     </div>
@@ -76,29 +81,27 @@ function DetailModal({ disease, onEdit, onClose }) {
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="modal-body">
                     <div className="detail-section">
                         <div className="detail-section-title">
                             <FileText size={14} strokeWidth={1.8} />
-                            Description
+                            {t('common.name')}
                         </div>
                         <p className="detail-text">{disease.description}</p>
                     </div>
                     <div className="detail-section">
                         <div className="detail-section-title">
                             <Activity size={14} strokeWidth={1.8} />
-                            Symptoms
+                            {t('diseases.symptoms')}
                         </div>
                         <p className="detail-text">{disease.symptoms}</p>
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="modal-footer">
-                    <button className="btn btn--secondary" onClick={onClose}>Close</button>
+                    <button className="btn btn--secondary" onClick={onClose}>{t('common.close')}</button>
                     <button className="btn btn--primary" onClick={() => onEdit(disease)}>
-                        <Pencil size={14} strokeWidth={1.8} /> Edit Disease
+                        <Pencil size={14} strokeWidth={1.8} /> {t('common.edit')}
                     </button>
                 </div>
             </div>
@@ -107,7 +110,7 @@ function DetailModal({ disease, onEdit, onClose }) {
 }
 
 // ── Add / Edit modal ──────────────────────────────────────────────────────────
-function FormModal({ disease, onSave, onClose }) {
+function FormModal({ disease, onSave, onClose, t }) {
     const isEdit = !!disease?.id;
     const [form, setForm] = useState(
         isEdit
@@ -123,7 +126,6 @@ function FormModal({ disease, onSave, onClose }) {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        // Store file object for upload — LATER: send as multipart/form-data to backend
         set('image', file);
         setPreview(URL.createObjectURL(file));
     };
@@ -135,9 +137,9 @@ function FormModal({ disease, onSave, onClose }) {
 
     const validate = () => {
         const e = {};
-        if (!form.name.trim())        e.name        = 'Name is required';
-        if (!form.description.trim()) e.description = 'Description is required';
-        if (!form.symptoms.trim())    e.symptoms    = 'Symptoms are required';
+        if (!form.name.trim())        e.name        = t('diseases.diseaseName') + ' *';
+        if (!form.description.trim()) e.description = t('common.name') + ' *';
+        if (!form.symptoms.trim())    e.symptoms    = t('diseases.symptoms') + ' *';
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -148,82 +150,72 @@ function FormModal({ disease, onSave, onClose }) {
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-box" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3 className="modal-title">{isEdit ? 'Edit Disease' : 'Add New Disease'}</h3>
+                    <h3 className="modal-title">{isEdit ? t('diseases.editTitle') : t('diseases.addTitle')}</h3>
                     <button className="modal-close" onClick={onClose}><X size={18} strokeWidth={2} /></button>
                 </div>
                 <div className="modal-body">
-                    {/* Name */}
                     <div className="form-field">
-                        <label className="form-label">Disease Name *</label>
+                        <label className="form-label">{t('diseases.diseaseName')} *</label>
                         <input className={`form-input ${errors.name ? 'form-input--error' : ''}`}
                                value={form.name} onChange={e => set('name', e.target.value)}
-                               placeholder="e.g. Early Blight" />
+                               placeholder="e.g. Leaf Blight" />
                         {errors.name && <span className="form-error">{errors.name}</span>}
                     </div>
-                    {/* Category + Severity */}
+
                     <div className="form-row">
                         <div className="form-field">
-                            <label className="form-label">Category *</label>
+                            <label className="form-label">{t('diseases.diseaseCategory')}</label>
                             <select className="form-input" value={form.category} onChange={e => set('category', e.target.value)}>
-                                {CATEGORY_OPTIONS.map(c => <option key={c}>{c}</option>)}
+                                {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                         <div className="form-field">
-                            <label className="form-label">Severity *</label>
+                            <label className="form-label">{t('diseases.severity')}</label>
                             <select className="form-input" value={form.severity} onChange={e => set('severity', e.target.value)}>
-                                {SEVERITY_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                                {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
                     </div>
-                    {/* Description */}
+
                     <div className="form-field">
-                        <label className="form-label">Description *</label>
+                        <label className="form-label">{t('common.name')} *</label>
                         <textarea className={`form-input form-textarea ${errors.description ? 'form-input--error' : ''}`}
-                                  value={form.description} onChange={e => set('description', e.target.value)}
-                                  placeholder="Describe the disease..." rows={3} />
+                                  value={form.description} onChange={e => set('description', e.target.value)} rows={3} />
                         {errors.description && <span className="form-error">{errors.description}</span>}
                     </div>
-                    {/* Symptoms */}
+
                     <div className="form-field">
-                        <label className="form-label">Symptoms *</label>
+                        <label className="form-label">{t('diseases.symptoms')} *</label>
                         <textarea className={`form-input form-textarea ${errors.symptoms ? 'form-input--error' : ''}`}
-                                  value={form.symptoms} onChange={e => set('symptoms', e.target.value)}
-                                  placeholder="Describe the symptoms..." rows={3} />
+                                  value={form.symptoms} onChange={e => set('symptoms', e.target.value)} rows={3} />
                         {errors.symptoms && <span className="form-error">{errors.symptoms}</span>}
                     </div>
-                    {/* Image upload — optional */}
+
                     <div className="form-field">
-                        <label className="form-label">Image <span className="form-optional">(optional)</span></label>
+                        <label className="form-label">
+                            {t('diseases.affectedPlants')} <span className="form-optional">({t('diseases.optional')})</span>
+                        </label>
                         {preview ? (
                             <div className="img-preview-wrap">
                                 <img src={preview} alt="preview" className="img-preview" />
-                                <button className="img-remove" onClick={removeImage} type="button">
-                                    <X size={14} strokeWidth={2} /> Remove
+                                <button className="img-remove" onClick={removeImage}>
+                                    <X size={13} strokeWidth={2} /> {t('common.delete')}
                                 </button>
                             </div>
                         ) : (
                             <label className="img-upload-zone">
-                                <input type="file" accept="image/*" onChange={handleImageChange} className="img-upload-input" />
-                                <div className="img-upload-icon">🖼️</div>
-                                <div className="img-upload-text">Click to upload image</div>
-                                <div className="img-upload-sub">PNG, JPG up to 5MB</div>
+                                <input type="file" accept="image/*" className="img-upload-input" onChange={handleImageChange} />
+                                <span className="img-upload-icon">🖼️</span>
+                                <span className="img-upload-text">Click to upload image</span>
+                                <span className="img-upload-sub">PNG, JPG up to 5MB</span>
                             </label>
                         )}
                     </div>
-                    {/* Image description */}
-                    <div className="form-field">
-                        <label className="form-label">Image Description <span className="form-optional">(optional)</span></label>
-                        <input className="form-input"
-                               value={form.image_description}
-                               onChange={e => set('image_description', e.target.value)}
-                               placeholder="e.g. Leaf with dark brown spots surrounded by yellow halos" />
-                    </div>
                 </div>
+
                 <div className="modal-footer">
-                    <button className="btn btn--secondary" onClick={onClose}>Cancel</button>
-                    <button className="btn btn--primary" onClick={handleSave}>
-                        {isEdit ? 'Save Changes' : 'Add Disease'}
-                    </button>
+                    <button className="btn btn--secondary" onClick={onClose}>{t('common.cancel')}</button>
+                    <button className="btn btn--primary" onClick={handleSave}>{t('common.save')}</button>
                 </div>
             </div>
         </div>
@@ -231,7 +223,7 @@ function FormModal({ disease, onSave, onClose }) {
 }
 
 // ── Delete modal ──────────────────────────────────────────────────────────────
-function DeleteModal({ disease, onConfirm, onCancel }) {
+function DeleteModal({ disease, onConfirm, onCancel, t }) {
     if (!disease) return null;
     return (
         <div className="modal-overlay" onClick={onCancel}>
@@ -239,11 +231,13 @@ function DeleteModal({ disease, onConfirm, onCancel }) {
                 <div className="modal-warn-icon">
                     <AlertTriangle size={26} color="var(--red)" strokeWidth={1.8} />
                 </div>
-                <h3 className="modal-warn-title">Delete Disease</h3>
-                <p className="modal-warn-desc">Are you sure you want to delete <strong>{disease.name}</strong>? This cannot be undone.</p>
+                <h3 className="modal-warn-title">{t('diseases.deleteTitle')}</h3>
+                <p className="modal-warn-desc">
+                    {t('diseases.deleteDesc')} <strong>{disease.name}</strong>? {t('diseases.deleteWarn')}
+                </p>
                 <div className="modal-warn-actions">
-                    <button className="btn btn--secondary" onClick={onCancel}>Cancel</button>
-                    <button className="btn btn--danger" onClick={onConfirm}>Delete</button>
+                    <button className="btn btn--secondary" onClick={onCancel}>{t('common.cancel')}</button>
+                    <button className="btn btn--danger" onClick={onConfirm}>{t('common.delete')}</button>
                 </div>
             </div>
         </div>
@@ -252,22 +246,23 @@ function DeleteModal({ disease, onConfirm, onCancel }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function Diseases() {
-    const [diseases,  setDiseases]  = useState(MOCK_DISEASES);
-    const [search,    setSearch]    = useState('');
-    const [filterSev, setFilterSev] = useState('ALL');
-    const [filterCat, setFilterCat] = useState('ALL');
-    const [sortKey,   setSortKey]   = useState('name');
-    const [sortDir,   setSortDir]   = useState('asc');
-    const [modal,     setModal]     = useState(null); // 'detail' | 'form' | 'delete'
-    const [selected,  setSelected]  = useState(null);
+    const { t } = useLang();
+    const [diseases,   setDiseases]   = useState(MOCK_DISEASES);
+    const [search,     setSearch]     = useState('');
+    const [filterSev,  setFilterSev]  = useState('ALL');
+    const [filterCat,  setFilterCat]  = useState('ALL');
+    const [sortKey,    setSortKey]    = useState('name');
+    const [sortDir,    setSortDir]    = useState('asc');
+    const [modal,      setModal]      = useState(null);
+    const [selected,   setSelected]   = useState(null);
 
     const filtered = diseases
         .filter(d => {
             const q = search.toLowerCase();
             return (
                 (d.name.toLowerCase().includes(q) || d.category.toLowerCase().includes(q)) &&
-                (filterSev === 'ALL' || d.severity  === filterSev) &&
-                (filterCat === 'ALL' || d.category  === filterCat)
+                (filterSev === 'ALL' || d.severity === filterSev) &&
+                (filterCat === 'ALL' || d.category === filterCat)
             );
         })
         .sort((a, b) => {
@@ -303,23 +298,21 @@ export default function Diseases() {
 
     return (
         <div className="diseases-page">
-            {/* Header */}
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Diseases</h1>
-                    <p className="page-subtitle">{diseases.length} diseases in the system</p>
+                    <h1 className="page-title">{t('diseases.title')}</h1>
+                    <p className="page-subtitle">{diseases.length} {t('diseases.subtitle')}</p>
                 </div>
                 <button className="btn btn--primary"
                         onClick={() => { setSelected(null); setModal('form'); }}>
-                    <Plus size={16} strokeWidth={2.2} /> Add Disease
+                    <Plus size={16} strokeWidth={2.2} /> {t('diseases.addBtn')}
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="dis-filters">
                 <div className="dis-search">
                     <Search size={15} color="var(--text-muted)" strokeWidth={1.8} />
-                    <input className="dis-search-input" placeholder="Search diseases..."
+                    <input className="dis-search-input" placeholder={t('diseases.searchPlaceholder')}
                            value={search} onChange={e => setSearch(e.target.value)} />
                     {search && (
                         <button className="dis-search-clear" onClick={() => setSearch('')}>
@@ -328,32 +321,35 @@ export default function Diseases() {
                     )}
                 </div>
                 <select className="dis-select" value={filterSev} onChange={e => setFilterSev(e.target.value)}>
-                    <option value="ALL">All Severities</option>
-                    {SEVERITY_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="ALL">{t('diseases.allSeverity')}</option>
+                    {SEVERITY_OPTIONS.map(s => (
+                        <option key={s} value={s}>
+                            {s === 'LOW' ? t('diseases.low') : s === 'MEDIUM' ? t('diseases.medium') : t('diseases.high')}
+                        </option>
+                    ))}
                 </select>
                 <select className="dis-select" value={filterCat} onChange={e => setFilterCat(e.target.value)}>
-                    <option value="ALL">All Categories</option>
+                    <option value="ALL">{t('diseases.allSeverity').replace('Severity', 'Categories').replace('Тежини', 'Категории')}</option>
                     {CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
-                <span className="dis-count">{filtered.length} results</span>
+                <span className="dis-count">{filtered.length} {t('analyses.results')}</span>
             </div>
 
-            {/* Table */}
             <div className="dis-card">
                 <div className="dis-table-wrap">
                     <table className="dis-table">
                         <thead>
                         <tr>
                             <th className="sortable" onClick={() => toggleSort('name')}>
-                                Name <SortIcon col="name" />
+                                {t('common.name')} <SortIcon col="name" />
                             </th>
                             <th className="sortable" onClick={() => toggleSort('category')}>
-                                Category <SortIcon col="category" />
+                                {t('diseases.diseaseCategory')} <SortIcon col="category" />
                             </th>
                             <th className="sortable" onClick={() => toggleSort('severity')}>
-                                Severity <SortIcon col="severity" />
+                                {t('diseases.severity')} <SortIcon col="severity" />
                             </th>
-                            <th>Actions</th>
+                            <th>{t('common.actions')}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -361,23 +357,23 @@ export default function Diseases() {
                             <tr><td colSpan={4}>
                                 <div className="dis-empty">
                                     <div className="dis-empty-icon">🌿</div>
-                                    <div className="dis-empty-title">No diseases found</div>
-                                    <div className="dis-empty-sub">Try adjusting your search or filters</div>
+                                    <div className="dis-empty-title">{t('diseases.noDiseasesTitle')}</div>
+                                    <div className="dis-empty-sub">{t('diseases.noDiseasesSub')}</div>
                                 </div>
                             </td></tr>
                         ) : filtered.map(d => (
                             <tr key={d.id} className="dis-row" onClick={() => openDetail(d)}>
                                 <td className="dis-name">{d.name}</td>
                                 <td className="dis-category">{d.category}</td>
-                                <td><SeverityBadge severity={d.severity} /></td>
+                                <td><SeverityBadge severity={d.severity} t={t} /></td>
                                 <td onClick={e => e.stopPropagation()}>
                                     <div className="dis-actions">
                                         <button className="dis-action-btn dis-action-btn--edit"
-                                                onClick={() => openEdit(d)} title="Edit">
+                                                onClick={() => openEdit(d)} title={t('common.edit')}>
                                             <Pencil size={15} strokeWidth={1.8} />
                                         </button>
                                         <button className="dis-action-btn dis-action-btn--delete"
-                                                onClick={() => openDelete(d)} title="Delete">
+                                                onClick={() => openDelete(d)} title={t('common.delete')}>
                                             <Trash2 size={15} strokeWidth={1.8} />
                                         </button>
                                     </div>
@@ -389,27 +385,14 @@ export default function Diseases() {
                 </div>
             </div>
 
-            {/* Modals */}
             {modal === 'detail' && (
-                <DetailModal
-                    disease={selected}
-                    onEdit={d => { setModal('form'); }}
-                    onClose={() => { setModal(null); setSelected(null); }}
-                />
+                <DetailModal disease={selected} t={t} onEdit={d => { setModal('form'); }} onClose={() => { setModal(null); setSelected(null); }} />
             )}
             {modal === 'form' && (
-                <FormModal
-                    disease={selected}
-                    onSave={handleSave}
-                    onClose={() => { setModal(null); setSelected(null); }}
-                />
+                <FormModal disease={selected} t={t} onSave={handleSave} onClose={() => { setModal(null); setSelected(null); }} />
             )}
             {modal === 'delete' && (
-                <DeleteModal
-                    disease={selected}
-                    onConfirm={handleDelete}
-                    onCancel={() => { setModal(null); setSelected(null); }}
-                />
+                <DeleteModal disease={selected} t={t} onConfirm={handleDelete} onCancel={() => { setModal(null); setSelected(null); }} />
             )}
         </div>
     );

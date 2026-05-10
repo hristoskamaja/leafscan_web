@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Globe, Bell, Shield, Info, Check, Save, Moon, Sun } from 'lucide-react';
+import { Globe, Bell, Shield, Check, Save, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useLang } from '../../context/LanguageContext';
 import './Settings.css';
 
 export default function Settings() {
     const { isDark, toggleTheme } = useTheme();
-    const [language,   setLanguage]   = useState('en');
+    const { lang, setLang, t }    = useLang();
+
     const [emailNotif, setEmailNotif] = useState(true);
     const [pushNotif,  setPushNotif]  = useState(false);
     const [twoFactor,  setTwoFactor]  = useState(false);
@@ -22,8 +24,8 @@ export default function Settings() {
 
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">General Settings</h1>
-                    <p className="page-subtitle">System-wide preferences for the admin panel</p>
+                    <h1 className="page-title">{t('settings.title')}</h1>
+                    <p className="page-subtitle">{t('settings.subtitle')}</p>
                 </div>
             </div>
 
@@ -36,21 +38,21 @@ export default function Settings() {
                             <Globe size={17} strokeWidth={1.8} />
                         </div>
                         <div>
-                            <h2 className="settings-section-title">Language</h2>
-                            <p className="settings-section-desc">Choose the display language for the admin panel interface</p>
+                            <h2 className="settings-section-title">{t('settings.language')}</h2>
+                            <p className="settings-section-desc">{t('settings.languageDesc')}</p>
                         </div>
                     </div>
                     <div className="settings-card-body">
                         <div className="lang-options">
                             <button
-                                className={`lang-btn ${language === 'en' ? 'lang-btn--active' : ''}`}
-                                onClick={() => setLanguage('en')}
+                                className={`lang-btn ${lang === 'en' ? 'lang-btn--active' : ''}`}
+                                onClick={() => setLang('en')}
                             >
                                 <span className="lang-flag">🇬🇧</span> English
                             </button>
                             <button
-                                className={`lang-btn ${language === 'mk' ? 'lang-btn--active' : ''}`}
-                                onClick={() => setLanguage('mk')}
+                                className={`lang-btn ${lang === 'mk' ? 'lang-btn--active' : ''}`}
+                                onClick={() => setLang('mk')}
                             >
                                 <span className="lang-flag">🇲🇰</span> Македонски
                             </button>
@@ -65,14 +67,14 @@ export default function Settings() {
                             {isDark ? <Moon size={17} strokeWidth={1.8} /> : <Sun size={17} strokeWidth={1.8} />}
                         </div>
                         <div>
-                            <h2 className="settings-section-title">Appearance</h2>
-                            <p className="settings-section-desc">Switch between dark and light mode</p>
+                            <h2 className="settings-section-title">{t('settings.appearance')}</h2>
+                            <p className="settings-section-desc">{t('settings.appearanceDesc')}</p>
                         </div>
                     </div>
                     <div className="settings-card-body">
                         <ToggleRow
-                            label={isDark ? 'Dark Mode' : 'Light Mode'}
-                            sub={isDark ? 'Currently using dark theme' : 'Currently using light theme'}
+                            label={isDark ? t('settings.darkMode') : t('settings.lightMode')}
+                            sub={t('settings.darkModeSub')}
                             checked={isDark}
                             onChange={toggleTheme}
                         />
@@ -89,7 +91,7 @@ export default function Settings() {
                                         <div className="theme-thumb-bar theme-thumb-bar--short" />
                                     </div>
                                 </div>
-                                <span>Dark</span>
+                                <span>{t('settings.darkMode')}</span>
                             </div>
                             <div
                                 className={`theme-option ${!isDark ? 'theme-option--active' : ''}`}
@@ -102,7 +104,7 @@ export default function Settings() {
                                         <div className="theme-thumb-bar theme-thumb-bar--short theme-thumb-bar--light" />
                                     </div>
                                 </div>
-                                <span>Light</span>
+                                <span>{t('settings.lightMode')}</span>
                             </div>
                         </div>
                     </div>
@@ -115,21 +117,21 @@ export default function Settings() {
                             <Bell size={17} strokeWidth={1.8} />
                         </div>
                         <div>
-                            <h2 className="settings-section-title">Notifications</h2>
-                            <p className="settings-section-desc">Control how and when you receive alerts</p>
+                            <h2 className="settings-section-title">{t('settings.notifications')}</h2>
+                            <p className="settings-section-desc">{t('settings.notificationsDesc')}</p>
                         </div>
                     </div>
                     <div className="settings-card-body">
                         <ToggleRow
-                            label="Email Notifications"
-                            sub="Receive email alerts for new analyses"
+                            label={t('settings.emailNotif')}
+                            sub={t('settings.emailNotifSub')}
                             checked={emailNotif}
                             onChange={setEmailNotif}
                         />
                         <div className="settings-divider" />
                         <ToggleRow
-                            label="Push Notifications"
-                            sub="Browser push notifications for critical alerts"
+                            label={t('settings.pushNotif')}
+                            sub={t('settings.pushNotifSub')}
                             checked={pushNotif}
                             onChange={setPushNotif}
                         />
@@ -143,21 +145,21 @@ export default function Settings() {
                             <Shield size={17} strokeWidth={1.8} />
                         </div>
                         <div>
-                            <h2 className="settings-section-title">Security</h2>
-                            <p className="settings-section-desc">Account security and session preferences</p>
+                            <h2 className="settings-section-title">{t('settings.security')}</h2>
+                            <p className="settings-section-desc">{t('settings.securityDesc')}</p>
                         </div>
                     </div>
                     <div className="settings-card-body">
                         <ToggleRow
-                            label="Two-Factor Authentication"
-                            sub="Require a verification code on every login"
+                            label={t('settings.twoFactor')}
+                            sub={t('settings.twoFactorSub')}
                             checked={twoFactor}
                             onChange={setTwoFactor}
                         />
                         <div className="settings-divider" />
                         <ToggleRow
-                            label="Session Activity Log"
-                            sub="Keep a log of all admin login sessions"
+                            label={t('settings.sessionLog')}
+                            sub={t('settings.sessionLogSub')}
                             checked={sessionLog}
                             onChange={setSessionLog}
                         />
@@ -172,8 +174,8 @@ export default function Settings() {
                     onClick={handleSave}
                 >
                     {saved
-                        ? <><Check size={17} strokeWidth={2.5} /> Changes Saved!</>
-                        : <><Save  size={17} strokeWidth={1.8} /> Save All Changes</>
+                        ? <><Check size={17} strokeWidth={2.5} /> {t('settings.savedBtn')}</>
+                        : <><Save  size={17} strokeWidth={1.8} /> {t('settings.saveBtn')}</>
                     }
                 </button>
             </div>

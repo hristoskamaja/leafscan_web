@@ -8,9 +8,9 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer
 } from 'recharts';
+import { useLang } from '../../context/LanguageContext';
 import './Statistics.css';
 
-// ── Mock data ─────────────────────────────────────────────────────────────────
 const MONTHLY_ANALYSES = [
     { month: 'Jan', analyses: 130, healthy: 54,  infected: 76  },
     { month: 'Feb', analyses: 168, healthy: 71,  infected: 97  },
@@ -27,12 +27,12 @@ const MONTHLY_ANALYSES = [
 ];
 
 const DISEASE_BREAKDOWN = [
-    { name: 'Leaf Blight',     value: 312, color: '#5C9E78' },
-    { name: 'Powdery Mildew',  value: 198, color: '#7CC49A' },
-    { name: 'Root Rot',        value: 164, color: '#E8924A' },
-    { name: 'Rust Disease',    value: 127, color: '#F5C87A' },
-    { name: 'Bacterial Blight',value: 98,  color: '#7AB8F5' },
-    { name: 'Mosaic Virus',    value: 74,  color: '#C084FC' },
+    { name: 'Leaf Blight',      value: 312, color: '#5C9E78' },
+    { name: 'Powdery Mildew',   value: 198, color: '#7CC49A' },
+    { name: 'Root Rot',         value: 164, color: '#E8924A' },
+    { name: 'Rust Disease',     value: 127, color: '#F5C87A' },
+    { name: 'Bacterial Blight', value: 98,  color: '#7AB8F5' },
+    { name: 'Mosaic Virus',     value: 74,  color: '#C084FC' },
 ];
 
 const PLANT_INFECTION_RATE = [
@@ -61,16 +61,6 @@ const ACCURACY_TREND = [
     { month: 'Dec', accuracy: 94.7 },
 ];
 
-const TOP_STATS = [
-    { label: 'Total Analyses',    value: '3,847', trend: '+18.2%', Icon: ScanLine,     color: 'green'  },
-    { label: 'Diseases Detected', value: '973',   trend: '+11.4%', Icon: Bug,          color: 'orange' },
-    { label: 'Avg Accuracy',      value: '92.8%', trend: '+3.6%',  Icon: Target,       color: 'teal'   },
-    { label: 'Active Users',      value: '1,234', trend: '+8.2%',  Icon: Users,        color: 'blue'   },
-];
-
-const RANGE_OPTIONS = ['Last 6 months', 'Last 12 months', 'This year'];
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
@@ -101,16 +91,15 @@ const AccuracyTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-function StatCard({ stat }) {
-    const { Icon } = stat;
+function StatCard({ label, value, trend, Icon, color }) {
     return (
-        <div className={`dash-stat dash-stat--${stat.color}`}>
+        <div className={`dash-stat dash-stat--${color}`}>
             <div className="dash-stat-left">
-                <div className="dash-stat-label">{stat.label}</div>
-                <div className="dash-stat-value">{stat.value}</div>
+                <div className="dash-stat-label">{label}</div>
+                <div className="dash-stat-value">{value}</div>
                 <div className="dash-stat-trend">
                     <TrendingUp size={11} strokeWidth={2} style={{ display: 'inline', marginRight: 3 }} />
-                    {stat.trend}
+                    {trend}
                 </div>
             </div>
             <div className="dash-stat-icon">
@@ -120,53 +109,63 @@ function StatCard({ stat }) {
     );
 }
 
-// ── Main Statistics page ──────────────────────────────────────────────────────
 export default function Statistics() {
-    const [range, setRange] = useState('Last 12 months');
+    const { t } = useLang();
+    const [range, setRange] = useState('last12');
 
-    const displayData = range === 'Last 6 months'
+    const RANGE_OPTIONS = [
+        { key: 'last6',  label: t('statistics.last6months')  || t('statistics.last7days') },
+        { key: 'last12', label: t('statistics.last12months') },
+        { key: 'year',   label: t('statistics.last3months')  },
+    ];
+
+    const TOP_STATS = [
+        { label: t('statistics.totalAnalyses'),    value: '3,847', trend: '+18.2%', Icon: ScanLine, color: 'green'  },
+        { label: t('dashboard.diseasesDetected'),  value: '973',   trend: '+11.4%', Icon: Bug,      color: 'orange' },
+        { label: t('statistics.avgConfidence'),    value: '92.8%', trend: '+3.6%',  Icon: Target,   color: 'teal'   },
+        { label: t('statistics.activePlants'),     value: '1,234', trend: '+8.2%',  Icon: Users,    color: 'blue'   },
+    ];
+
+    const displayData = range === 'last6'
         ? MONTHLY_ANALYSES.slice(-6)
         : MONTHLY_ANALYSES;
 
-    const totalAnalyses  = displayData.reduce((s, d) => s + d.analyses,  0);
-    const totalInfected  = displayData.reduce((s, d) => s + d.infected,  0);
-    const infectionRate  = ((totalInfected / totalAnalyses) * 100).toFixed(1);
+    const totalAnalyses = displayData.reduce((s, d) => s + d.analyses, 0);
+    const totalInfected = displayData.reduce((s, d) => s + d.infected, 0);
+    const infectionRate = ((totalInfected / totalAnalyses) * 100).toFixed(1);
 
     return (
         <div className="statistics-page">
-            {/* Header */}
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Statistics</h1>
-                    <p className="page-subtitle">Platform-wide insights and trends</p>
+                    <h1 className="page-title">{t('statistics.title')}</h1>
+                    <p className="page-subtitle">{t('statistics.subtitle')}</p>
                 </div>
                 <div className="stat-range-tabs">
                     {RANGE_OPTIONS.map(r => (
                         <button
-                            key={r}
-                            className={`range-tab ${range === r ? 'range-tab--active' : ''}`}
-                            onClick={() => setRange(r)}
+                            key={r.key}
+                            className={`range-tab ${range === r.key ? 'range-tab--active' : ''}`}
+                            onClick={() => setRange(r.key)}
                         >
-                            {r}
+                            {r.label}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Top stat cards */}
             <div className="dash-stats-grid">
-                {TOP_STATS.map(s => <StatCard key={s.label} stat={s} />)}
+                {TOP_STATS.map(s => <StatCard key={s.label} {...s} />)}
             </div>
 
-            {/* Row 1: Area chart + Pie chart */}
+            {/* Row 1 */}
             <div className="stat-charts-row">
-                {/* Analyses over time */}
                 <div className="dash-card dash-card--wide">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Analyses Over Time</h2>
+                        <h2 className="dash-card-title">{t('statistics.analysesOverTime')}</h2>
                         <div className="stat-legend">
-                            <span className="stat-legend-item stat-legend-item--healthy">Healthy</span>
-                            <span className="stat-legend-item stat-legend-item--infected">Infected</span>
+                            <span className="stat-legend-item stat-legend-item--healthy">{t('statistics.healthy')}</span>
+                            <span className="stat-legend-item stat-legend-item--infected">{t('statistics.infected')}</span>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={260}>
@@ -185,16 +184,15 @@ export default function Statistics() {
                             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#7A9080' }} axisLine={false} tickLine={false} />
                             <YAxis tick={{ fontSize: 12, fill: '#7A9080' }} axisLine={false} tickLine={false} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Area type="monotone" dataKey="healthy"  name="Healthy"  stroke="#5C9E78" strokeWidth={2} fill="url(#healthyGrad)"  dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
-                            <Area type="monotone" dataKey="infected" name="Infected" stroke="#E8924A" strokeWidth={2} fill="url(#infectedGrad)" dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
+                            <Area type="monotone" dataKey="healthy"  name={t('statistics.healthy')}  stroke="#5C9E78" strokeWidth={2} fill="url(#healthyGrad)"  dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
+                            <Area type="monotone" dataKey="infected" name={t('statistics.infected')} stroke="#E8924A" strokeWidth={2} fill="url(#infectedGrad)" dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Disease breakdown pie */}
                 <div className="dash-card">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Disease Breakdown</h2>
+                        <h2 className="dash-card-title">{t('statistics.diseaseDistribution')}</h2>
                     </div>
                     <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
@@ -227,12 +225,11 @@ export default function Statistics() {
                 </div>
             </div>
 
-            {/* Row 2: Bar chart + Accuracy trend */}
+            {/* Row 2 */}
             <div className="stat-charts-row">
-                {/* Plant infection rate */}
                 <div className="dash-card">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Infection Rate by Plant</h2>
+                        <h2 className="dash-card-title">{t('statistics.infectionRate')} by Plant</h2>
                         <span className="stat-subtitle-tag">% of analyses flagged</span>
                     </div>
                     <ResponsiveContainer width="100%" height={260}>
@@ -245,7 +242,7 @@ export default function Statistics() {
                             <XAxis type="number" tick={{ fontSize: 11, fill: '#7A9080' }} axisLine={false} tickLine={false} unit="%" />
                             <YAxis dataKey="plant" type="category" tick={{ fontSize: 12, fill: '#7A9080' }} axisLine={false} tickLine={false} width={52} />
                             <Tooltip
-                                formatter={val => [`${val}%`, 'Infection rate']}
+                                formatter={val => [`${val}%`, t('statistics.infectionRate')]}
                                 contentStyle={{ background: '#1E2923', border: '1px solid #243028', borderRadius: 10, fontSize: 13 }}
                             />
                             <Bar dataKey="rate" radius={[0, 6, 6, 0]}>
@@ -257,7 +254,6 @@ export default function Statistics() {
                     </ResponsiveContainer>
                 </div>
 
-                {/* Accuracy trend */}
                 <div className="dash-card dash-card--wide">
                     <div className="dash-card-header">
                         <h2 className="dash-card-title">Model Accuracy Trend</h2>
@@ -285,7 +281,7 @@ export default function Statistics() {
                 </div>
             </div>
 
-            {/* Row 3: Summary cards */}
+            {/* Summary row */}
             <div className="stat-summary-row">
                 <div className="dash-card stat-summary-card">
                     <div className="stat-summary-icon stat-summary-icon--green">
@@ -299,7 +295,7 @@ export default function Statistics() {
                     <div className="stat-summary-icon stat-summary-icon--orange">
                         <AlertTriangle size={20} strokeWidth={1.8} />
                     </div>
-                    <div className="stat-summary-label">Infection Rate</div>
+                    <div className="stat-summary-label">{t('statistics.infectionRate')}</div>
                     <div className="stat-summary-value">{infectionRate}%</div>
                     <div className="stat-summary-sub">of all analyses</div>
                 </div>

@@ -8,16 +8,10 @@ import {
     PieChart, Pie, Cell, Legend,
     BarChart, Bar
 } from 'recharts';
+import { useLang } from '../../context/LanguageContext';
 import './Dashboard.css';
 
 // ── Mock data ─────────────────────────────────────────────────────────────────
-const STATS = [
-    { label: 'Total Analyses',    value: '2,847', trend: '+12.5%', Icon: ScanLine, color: 'green'  },
-    { label: 'Total Users',       value: '1,234', trend: '+8.2%',  Icon: Users,    color: 'blue'   },
-    { label: 'Diseases Detected', value: '47',    trend: '+3',     Icon: Bug,      color: 'orange' },
-    { label: 'Accuracy Rate',     value: '94.7%', trend: '+1.2%',  Icon: Target,   color: 'teal'   },
-];
-
 const MONTHLY_TREND = [
     { month: 'Jan', count: 130 },
     { month: 'Feb', count: 168 },
@@ -38,7 +32,7 @@ const DISEASE_DIST = [
 ];
 
 const RECENT_ANALYSES = [
-    { id: 'AN-2847', plant: 'Tomato', disease: 'Leaf Blight',    confidence: '94.2%', result: 'INFECTED' },
+    { id: 'AN-2847', plant: 'Tomato', disease: '—',              confidence: '94.2%', result: 'INFECTED' },
     { id: 'AN-2846', plant: 'Potato', disease: '—',              confidence: '98.1%', result: 'HEALTHY'  },
     { id: 'AN-2845', plant: 'Corn',   disease: 'Rust',           confidence: '87.5%', result: 'INFECTED' },
     { id: 'AN-2844', plant: 'Grape',  disease: 'Powdery Mildew', confidence: '91.3%', result: 'INFECTED' },
@@ -55,16 +49,15 @@ const TOP_PLANTS = [
 ];
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
-function StatCard({ stat }) {
-    const { Icon } = stat;
+function StatCard({ label, value, trend, Icon, color }) {
     return (
-        <div className={`dash-stat dash-stat--${stat.color}`}>
+        <div className={`dash-stat dash-stat--${color}`}>
             <div className="dash-stat-left">
-                <div className="dash-stat-label">{stat.label}</div>
-                <div className="dash-stat-value">{stat.value}</div>
+                <div className="dash-stat-label">{label}</div>
+                <div className="dash-stat-value">{value}</div>
                 <div className="dash-stat-trend">
                     <TrendingUp size={11} strokeWidth={2} style={{ display:'inline', marginRight:3 }} />
-                    {stat.trend}
+                    {trend}
                 </div>
             </div>
             <div className="dash-stat-icon">
@@ -75,16 +68,16 @@ function StatCard({ stat }) {
 }
 
 // ── Result badge ──────────────────────────────────────────────────────────────
-function ResultBadge({ result }) {
+function ResultBadge({ result, t }) {
     const isHealthy = result === 'HEALTHY';
     return (
         <span className={`result-badge result-badge--${isHealthy ? 'healthy' : 'infected'}`}>
-      {isHealthy ? 'Healthy' : 'Infected'}
-    </span>
+            {isHealthy ? t('analyses.healthy') : t('analyses.infected')}
+        </span>
     );
 }
 
-// ── Custom tooltip for charts ─────────────────────────────────────────────────
+// ── Custom tooltip ─────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
@@ -99,13 +92,22 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+    const { t } = useLang();
+
+    const STATS = [
+        { label: t('dashboard.totalAnalyses'),    value: '2,847', trend: '+12.5%', Icon: ScanLine, color: 'green'  },
+        { label: t('dashboard.totalUsers'),       value: '1,234', trend: '+8.2%',  Icon: Users,    color: 'blue'   },
+        { label: t('dashboard.diseasesDetected'), value: '47',    trend: '+3',     Icon: Bug,      color: 'orange' },
+        { label: t('dashboard.accuracyRate'),     value: '94.7%', trend: '+1.2%',  Icon: Target,   color: 'teal'   },
+    ];
+
     return (
         <div className="dashboard">
             {/* Header */}
             <div className="dashboard-header">
                 <div>
-                    <h1 className="dashboard-title">Dashboard</h1>
-                    <p className="dashboard-subtitle">Welcome back, Admin. Here's what's happening.</p>
+                    <h1 className="dashboard-title">{t('dashboard.title')}</h1>
+                    <p className="dashboard-subtitle">{t('dashboard.subtitle')}</p>
                 </div>
                 <div className="dashboard-date">
                     {new Date().toLocaleDateString('en-US', {
@@ -116,15 +118,14 @@ export default function Dashboard() {
 
             {/* Stats */}
             <div className="dash-stats-grid">
-                {STATS.map(s => <StatCard key={s.label} stat={s} />)}
+                {STATS.map(s => <StatCard key={s.label} {...s} />)}
             </div>
 
             {/* Charts row 1 */}
             <div className="dash-charts-row">
-                {/* Monthly Trend */}
                 <div className="dash-card dash-card--wide">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Monthly Trend</h2>
+                        <h2 className="dash-card-title">{t('dashboard.monthlyTrend')}</h2>
                     </div>
                     <ResponsiveContainer width="100%" height={260}>
                         <LineChart data={MONTHLY_TREND} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
@@ -144,10 +145,9 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                 </div>
 
-                {/* Disease Distribution */}
                 <div className="dash-card">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Disease Distribution</h2>
+                        <h2 className="dash-card-title">{t('dashboard.diseaseDistribution')}</h2>
                     </div>
                     <ResponsiveContainer width="100%" height={260}>
                         <PieChart>
@@ -174,23 +174,22 @@ export default function Dashboard() {
 
             {/* Charts row 2 */}
             <div className="dash-charts-row">
-                {/* Recent Analyses */}
                 <div className="dash-card dash-card--wide">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Recent Analyses</h2>
+                        <h2 className="dash-card-title">{t('dashboard.recentAnalyses')}</h2>
                         <Link to="/analyses" className="dash-view-all">
-                            View All <ArrowRight size={13} strokeWidth={2} style={{ display:'inline', verticalAlign:'middle' }} />
+                            {t('common.viewAll')} <ArrowRight size={13} strokeWidth={2} style={{ display:'inline', verticalAlign:'middle' }} />
                         </Link>
                     </div>
                     <div className="dash-table-wrap">
                         <table className="dash-table">
                             <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Plant</th>
-                                <th>Disease</th>
-                                <th>Confidence</th>
-                                <th>Result</th>
+                                <th>{t('analyses.id')}</th>
+                                <th>{t('analyses.plant')}</th>
+                                <th>{t('analyses.disease')}</th>
+                                <th>{t('analyses.confidence')}</th>
+                                <th>{t('analyses.result')}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -200,7 +199,7 @@ export default function Dashboard() {
                                     <td>{row.plant}</td>
                                     <td className="dash-table-disease">{row.disease}</td>
                                     <td>{row.confidence}</td>
-                                    <td><ResultBadge result={row.result} /></td>
+                                    <td><ResultBadge result={row.result} t={t} /></td>
                                 </tr>
                             ))}
                             </tbody>
@@ -208,10 +207,9 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Top Plants */}
                 <div className="dash-card">
                     <div className="dash-card-header">
-                        <h2 className="dash-card-title">Top Detected Diseases</h2>
+                        <h2 className="dash-card-title">{t('dashboard.topDetected')}</h2>
                     </div>
                     <ResponsiveContainer width="100%" height={260}>
                         <BarChart
