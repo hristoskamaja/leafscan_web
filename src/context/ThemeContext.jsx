@@ -24,7 +24,7 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('ls_theme');
-    return saved ? saved === 'dark' : false; // default dark
+    return saved ? saved === 'dark' : false; // default light
   });
 
   // Apply theme class to <html> element
